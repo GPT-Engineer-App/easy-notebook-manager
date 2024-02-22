@@ -31,10 +31,27 @@ const Index = () => {
     }, 1000);
   };
 
+  const [editingName, setEditingName] = useState("");
+
   const handleNewNotebook = () => {
-    const newId = `notebook-${Object.keys(notebooks).length + 1}`;
-    setNotebooks({ ...notebooks, [newId]: "" });
-    setCurrentNotebook(newId);
+    const newId = editingName.trim() || `notebook-${Object.keys(notebooks).length + 1}`;
+    if (newId) {
+      setNotebooks({ ...notebooks, [newId]: "" });
+      setCurrentNotebook(newId);
+      setEditingName("");
+    }
+  };
+
+  const handleRenameNotebook = (id) => {
+    const updatedNotebooks = { ...notebooks };
+    const newName = editingName.trim();
+    if (newName && newName !== id) {
+      updatedNotebooks[newName] = updatedNotebooks[id];
+      delete updatedNotebooks[id];
+      setNotebooks(updatedNotebooks);
+      setCurrentNotebook(newName);
+    }
+    setEditingName("");
   };
 
   const handleDeleteNotebook = (id) => {
@@ -81,8 +98,9 @@ const Index = () => {
         <VStack align="stretch" spacing={4}>
           {Object.keys(notebooks).map((id) => (
             <Flex key={id}>
-              <Button onClick={() => handleNotebookSelect(id)} leftIcon={<FaBook />} colorScheme="teal" variant="outline">
-                {id}
+              <Input value={id} onChange={(e) => setEditingName(e.target.value)} size="md" />
+              <Button onClick={() => handleRenameNotebook(id)} colorScheme="blue" variant="outline">
+                Rename
               </Button>
               <Spacer />
               <IconButton icon={<FaTrash />} onClick={() => handleDeleteNotebook(id)} colorScheme="red" aria-label="Delete Notebook" />
@@ -96,9 +114,9 @@ const Index = () => {
           <Box mt={4} position="relative">
             <Text mb={2}>Editing {currentNotebook}</Text>
             <Textarea value={notebookContent} onChange={handleContentChange} placeholder="Start typing..." size="sm" />
-            <Box position="absolute" top="1" right="1">
-              {isSaving ? <IconButton icon={<FaSpinner />} variant="ghost" isRound={true} spin label="Saving..." /> : <IconButton icon={<FaCheck />} variant="ghost" isRound={true} label="Saved" />}
-            </Box>
+            <Flex position="absolute" top="2" right="2" align="center">
+              {isSaving ? <FaSpinner size="sm" label="Saving..." spin /> : <IconButton icon={<FaCheck />} variant="ghost" isRound={true} label="Saved" aria-label="Saved" />}
+            </Flex>
           </Box>
         )}
       </Box>
