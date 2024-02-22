@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { ChakraProvider, Box, VStack, Heading, Button, Input, Textarea, Text, IconButton, useToast, Flex, Spacer } from "@chakra-ui/react";
-import { FaSave, FaTrash, FaPlus, FaBook, FaUserMinus } from "react-icons/fa";
+import { FaTrash, FaPlus, FaBook, FaUserMinus, FaSpinner, FaCheck } from "react-icons/fa";
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [notebooks, setNotebooks] = useState({});
   const [currentNotebook, setCurrentNotebook] = useState("");
   const [notebookContent, setNotebookContent] = useState("");
-  const toast = useToast();
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleLogin = () => {
     // For now, simply set logged in status to true
@@ -24,12 +24,11 @@ const Index = () => {
     // Autosaving would be implemented here
     // For the sake of this example, we mock the save functionality
     setNotebooks({ ...notebooks, [currentNotebook]: e.target.value });
-    toast({
-      title: "Notebook saved.",
-      status: "success",
-      duration: 1000,
-      isClosable: true,
-    });
+    setIsSaving(true);
+    // Simulate a save delay
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 1000);
   };
 
   const handleNewNotebook = () => {
@@ -94,9 +93,12 @@ const Index = () => {
           </Button>
         </VStack>
         {currentNotebook && (
-          <Box mt={4}>
+          <Box mt={4} position="relative">
             <Text mb={2}>Editing {currentNotebook}</Text>
             <Textarea value={notebookContent} onChange={handleContentChange} placeholder="Start typing..." size="sm" />
+            <Box position="absolute" top="1" right="1">
+              {isSaving ? <IconButton icon={<FaSpinner />} variant="ghost" isRound={true} spin label="Saving..." /> : <IconButton icon={<FaCheck />} variant="ghost" isRound={true} label="Saved" />}
+            </Box>
           </Box>
         )}
       </Box>
